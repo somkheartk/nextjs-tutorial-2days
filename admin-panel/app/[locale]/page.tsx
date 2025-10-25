@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function Home() {
+  const t = useTranslations()
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
       <div className="text-center text-white p-8">

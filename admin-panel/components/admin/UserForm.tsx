@@ -1,7 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import {
+  Paper,
+  TextField,
+  MenuItem,
+  Button,
+  Box,
+  Typography,
+  Stack
+} from '@mui/material'
+import { Save, Cancel } from '@mui/icons-material'
 
 interface UserFormProps {
   user?: {
@@ -16,6 +27,9 @@ interface UserFormProps {
 
 export default function UserForm({ user, isEdit = false }: UserFormProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const t = useTranslations()
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -39,7 +53,7 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
       })
 
       if (res.ok) {
-        router.push('/admin/users')
+        router.push(`/${locale}/admin/users`)
         router.refresh()
       }
     } catch (error) {
@@ -49,71 +63,89 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
     }
   }
 
+  const roles = ['admin', 'user', 'moderator', 'editor', 'manager']
+  const statuses = ['active', 'inactive']
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Name</label>
-        <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+    <Paper elevation={2} sx={{ p: 4 }}>
+      <Typography variant="h5" component="h2" gutterBottom fontWeight="600">
+        {isEdit ? t('users.editUser') : t('users.createUser')}
+      </Typography>
+      
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Stack spacing={3}>
+          <TextField
+            fullWidth
+            label={t('users.name')}
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+            variant="outlined"
+          />
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Email</label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+          <TextField
+            fullWidth
+            type="email"
+            label={t('users.email')}
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            required
+            variant="outlined"
+          />
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Role</label>
-        <select
-          value={formData.role}
-          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="moderator">Moderator</option>
-        </select>
-      </div>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+            <TextField
+              fullWidth
+              select
+              label={t('users.role')}
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              variant="outlined"
+            >
+              {roles.map((role) => (
+                <MenuItem key={role} value={role}>
+                  {t(`users.roles.${role}`)}
+                </MenuItem>
+              ))}
+            </TextField>
 
-      <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium">Status</label>
-        <select
-          value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
+            <TextField
+              fullWidth
+              select
+              label={t('users.status')}
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              variant="outlined"
+            >
+              {statuses.map((status) => (
+                <MenuItem key={status} value={status}>
+                  {t(`common.${status}`)}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
-      <div className="flex gap-4">
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-blue-400"
-        >
-          {loading ? 'Saving...' : (isEdit ? 'Update User' : 'Create User')}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+          <Box className="flex gap-3">
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              startIcon={<Save />}
+              size="large"
+            >
+              {loading ? t('common.loading') : (isEdit ? t('users.updateUser') : t('users.createUser'))}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => router.back()}
+              startIcon={<Cancel />}
+              size="large"
+            >
+              {t('common.cancel')}
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
+    </Paper>
   )
 }

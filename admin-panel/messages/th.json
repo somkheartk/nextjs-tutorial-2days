@@ -1,0 +1,82 @@
+{
+  "common": {
+    "loading": "กำลังโหลด...",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "create": "สร้าง",
+    "update": "อัปเดต",
+    "search": "ค้นหา",
+    "actions": "จัดการ",
+    "status": "สถานะ",
+    "active": "ใช้งาน",
+    "inactive": "ไม่ใช้งาน",
+    "confirmDelete": "คุณแน่ใจหรือไม่ที่จะลบ{item}นี้?"
+  },
+  "navigation": {
+    "adminPanel": "แผงควบคุมผู้ดูแล",
+    "dashboard": "แดชบอร์ด",
+    "users": "ผู้ใช้",
+    "products": "สินค้า",
+    "logout": "ออกจากระบบ"
+  },
+  "dashboard": {
+    "title": "แดชบอร์ด",
+    "welcome": "ยินดีต้อนรับสู่แผงควบคุมผู้ดูแล",
+    "overview": "ภาพรวม",
+    "totalUsers": "ผู้ใช้ทั้งหมด",
+    "totalProducts": "สินค้าทั้งหมด",
+    "activeUsers": "ผู้ใช้ที่ใช้งาน",
+    "lowStock": "สินค้าใกล้หมด"
+  },
+  "users": {
+    "title": "ผู้ใช้",
+    "addUser": "+ เพิ่มผู้ใช้",
+    "createUser": "สร้างผู้ใช้",
+    "editUser": "แก้ไขผู้ใช้",
+    "updateUser": "อัปเดตผู้ใช้",
+    "name": "ชื่อ",
+    "email": "อีเมล",
+    "role": "บทบาท",
+    "status": "สถานะ",
+    "roles": {
+      "admin": "ผู้ดูแลระบบ",
+      "user": "ผู้ใช้",
+      "moderator": "ผู้ดูแล",
+      "editor": "บรรณาธิการ",
+      "manager": "ผู้จัดการ"
+    }
+  },
+  "products": {
+    "title": "สินค้า",
+    "addProduct": "+ เพิ่มสินค้า",
+    "createProduct": "สร้างสินค้า",
+    "editProduct": "แก้ไขสินค้า",
+    "updateProduct": "อัปเดตสินค้า",
+    "name": "ชื่อสินค้า",
+    "price": "ราคา",
+    "category": "หมวดหมู่",
+    "stock": "สต็อก",
+    "description": "รายละเอียด",
+    "status": "สถานะ",
+    "units": "หน่วย"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "adminLogin": "เข้าสู่ระบบผู้ดูแล",
+    "welcomeBack": "ยินดีต้อนรับกลับ! กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ"
+  },
+  "language": {
+    "english": "English",
+    "thai": "ไทย",
+    "switchLanguage": "เปลี่ยนภาษา"
+  },
+  "roleSwitch": {
+    "currentRole": "บทบาทปัจจุบัน",
+    "switchRole": "เปลี่ยนบทบาท",
+    "roleChanged": "เปลี่ยนบทบาทเป็น"
+  }
+}

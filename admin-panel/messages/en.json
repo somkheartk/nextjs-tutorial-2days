@@ -1,0 +1,82 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "actions": "Actions",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "confirmDelete": "Are you sure you want to delete this {item}?"
+  },
+  "navigation": {
+    "adminPanel": "Admin Panel",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "products": "Products",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Admin Panel",
+    "overview": "Overview",
+    "totalUsers": "Total Users",
+    "totalProducts": "Total Products",
+    "activeUsers": "Active Users",
+    "lowStock": "Low Stock Products"
+  },
+  "users": {
+    "title": "Users",
+    "addUser": "+ Add User",
+    "createUser": "Create User",
+    "editUser": "Edit User",
+    "updateUser": "Update User",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "roles": {
+      "admin": "Admin",
+      "user": "User",
+      "moderator": "Moderator",
+      "editor": "Editor",
+      "manager": "Manager"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "addProduct": "+ Add Product",
+    "createProduct": "Create Product",
+    "editProduct": "Edit Product",
+    "updateProduct": "Update Product",
+    "name": "Name",
+    "price": "Price",
+    "category": "Category",
+    "stock": "Stock",
+    "description": "Description",
+    "status": "Status",
+    "units": "units"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "adminLogin": "Admin Login",
+    "welcomeBack": "Welcome back! Please login to continue."
+  },
+  "language": {
+    "english": "English",
+    "thai": "ไทย",
+    "switchLanguage": "Switch Language"
+  },
+  "roleSwitch": {
+    "currentRole": "Current Role",
+    "switchRole": "Switch Role",
+    "roleChanged": "Role switched to"
+  }
+}

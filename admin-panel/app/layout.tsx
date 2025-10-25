@@ -11,11 +11,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="th">
-      <body className="antialiased">
-        {children}
-      </body>
-    </html>
-  );
+  return children;
 }
