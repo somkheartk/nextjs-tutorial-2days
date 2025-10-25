@@ -81,7 +81,7 @@ export async function PUT(
     
     products[index] = { ...products[index], ...body }
     return NextResponse.json(products[index])
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid request' },
       { status: 400 }

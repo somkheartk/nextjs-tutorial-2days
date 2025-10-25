@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import PageHeader from '@/components/ui/PageHeader'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {
   Card,
   CardContent,
@@ -11,8 +13,7 @@ import {
   Button,
   Box,
   Typography,
-  Chip,
-  CircularProgress
+  Chip
 } from '@mui/material'
 import { Edit, Delete, Add } from '@mui/icons-material'
 
@@ -60,29 +61,19 @@ export default function ProductsPage() {
   }
 
   if (loading) {
-    return (
-      <Box className="flex items-center justify-center h-64">
-        <CircularProgress />
-      </Box>
-    )
+    return <LoadingSpinner />
   }
 
   return (
     <Box>
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
-          {t('products.title')}
-        </Typography>
-        <Button
-          component={Link}
-          href={`/${locale}/admin/products/new`}
-          variant="contained"
-          startIcon={<Add />}
-          size="large"
-        >
-          {t('products.addProduct')}
-        </Button>
-      </Box>
+      <PageHeader 
+        title={t('products.title')}
+        action={{
+          href: `/${locale}/admin/products/new`,
+          label: t('products.addProduct'),
+          icon: <Add />
+        }}
+      />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 3 }}>
         {products.map((product) => (

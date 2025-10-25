@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import PageHeader from '@/components/ui/PageHeader'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {
   Paper,
   Table,
@@ -12,12 +14,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button,
   IconButton,
   Chip,
   Box,
-  Typography,
-  CircularProgress
+  Typography
 } from '@mui/material'
 import { Edit, Delete, Add } from '@mui/icons-material'
 
@@ -64,29 +64,19 @@ export default function UsersPage() {
   }
 
   if (loading) {
-    return (
-      <Box className="flex items-center justify-center h-64">
-        <CircularProgress />
-      </Box>
-    )
+    return <LoadingSpinner />
   }
 
   return (
     <Box>
-      <Box className="flex justify-between items-center mb-6">
-        <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
-          {t('users.title')}
-        </Typography>
-        <Button
-          component={Link}
-          href={`/${locale}/admin/users/new`}
-          variant="contained"
-          startIcon={<Add />}
-          size="large"
-        >
-          {t('users.addUser')}
-        </Button>
-      </Box>
+      <PageHeader 
+        title={t('users.title')}
+        action={{
+          href: `/${locale}/admin/users/new`,
+          label: t('users.addUser'),
+          icon: <Add />
+        }}
+      />
 
       <TableContainer component={Paper} elevation={2}>
         <Table>

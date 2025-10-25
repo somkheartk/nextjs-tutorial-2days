@@ -13,6 +13,7 @@ import {
   Stack
 } from '@mui/material'
 import { Save, Cancel } from '@mui/icons-material'
+import { USER_ROLES, STATUSES } from '@/lib/constants'
 
 interface UserFormProps {
   user?: {
@@ -63,9 +64,6 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
     }
   }
 
-  const roles = ['admin', 'user', 'moderator', 'editor', 'manager']
-  const statuses = ['active', 'inactive']
-
   return (
     <Paper elevation={2} sx={{ p: 4 }}>
       <Typography variant="h5" component="h2" gutterBottom fontWeight="600">
@@ -102,7 +100,7 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               variant="outlined"
             >
-              {roles.map((role) => (
+              {USER_ROLES.map((role) => (
                 <MenuItem key={role} value={role}>
                   {t(`users.roles.${role}`)}
                 </MenuItem>
@@ -117,7 +115,7 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               variant="outlined"
             >
-              {statuses.map((status) => (
+              {STATUSES.map((status) => (
                 <MenuItem key={status} value={status}>
                   {t(`common.${status}`)}
                 </MenuItem>

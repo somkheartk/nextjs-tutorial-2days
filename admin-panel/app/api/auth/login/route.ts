@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       { success: false, message: 'Invalid email or password' },
       { status: 401 }
     )
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, message: 'Server error' },
       { status: 500 }
