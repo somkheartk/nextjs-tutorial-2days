@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 
 interface User {
@@ -22,25 +22,28 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined)
 export function AdminProvider({ children, locale }: { children: ReactNode, locale: string }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [currentLocale, setCurrentLocale] = useState(locale)
-
-  useEffect(() => {
-    // Load user from localStorage if exists
-    const storedUser = localStorage.getItem('currentUser')
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser))
-    } else {
+  
+  // Initialize user from localStorage or default
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('currentUser')
+      if (storedUser) {
+        return JSON.parse(storedUser)
+      }
       // Set default user if not exists
       const defaultUser = {
         name: 'Admin User',
         email: 'admin@example.com',
         role: 'admin'
       }
-      setCurrentUser(defaultUser)
       localStorage.setItem('currentUser', JSON.stringify(defaultUser))
+      return defaultUser
     }
-  }, [])
+    return null
+  })
+  
+  const [currentLocale, setCurrentLocale] = useState(locale)
+
 
   const switchRole = (newRole: string) => {
     if (currentUser) {

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 // Mock database - In production, use a real database
-let products = [
+const products = [
   { 
     id: 1, 
     name: 'Laptop Pro 15', 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     }
     products.push(newProduct)
     return NextResponse.json(newProduct, { status: 201 })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid request' },
       { status: 400 }

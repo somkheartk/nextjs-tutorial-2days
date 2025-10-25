@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 // Mock database - In production, use a real database
-let users = [
+const users = [
   { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin', status: 'active' },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'user', status: 'active' },
   { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'moderator', status: 'inactive' },
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
     users.push(newUser)
     return NextResponse.json(newUser, { status: 201 })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid request' },
       { status: 400 }

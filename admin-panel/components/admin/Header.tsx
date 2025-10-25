@@ -4,9 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useAdmin } from '@/lib/AdminContext'
 import { 
-  Menu as MenuIcon,
   Language as LanguageIcon,
-  AccountCircle,
   SwapHoriz,
   ExitToApp
 } from '@mui/icons-material'
