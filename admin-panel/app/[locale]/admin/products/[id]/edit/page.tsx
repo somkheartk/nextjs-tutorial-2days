@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import ProductForm from '@/components/admin/ProductForm'
+import { Typography, Box, CircularProgress } from '@mui/material'
 
 export default function EditProductPage() {
   const params = useParams()
+  const t = useTranslations()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -19,13 +22,26 @@ export default function EditProductPage() {
       .catch(() => setLoading(false))
   }, [params.id])
 
-  if (loading) return <div>Loading...</div>
-  if (!product) return <div>Product not found</div>
+  if (loading) {
+    return (
+      <Box className="flex items-center justify-center h-64">
+        <CircularProgress />
+      </Box>
+    )
+  }
+  
+  if (!product) {
+    return (
+      <Typography variant="h6" color="error">Product not found</Typography>
+    )
+  }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Edit Product</h1>
+    <Box>
+      <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom color="text.primary">
+        {t('products.editProduct')}
+      </Typography>
       <ProductForm product={product} isEdit />
-    </div>
+    </Box>
   )
 }

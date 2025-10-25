@@ -1,6 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 export default function Home() {
+  const params = useParams()
+  const locale = params.locale as string
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
       <div className="text-center text-white p-8">
@@ -12,7 +18,7 @@ export default function Home() {
         
         <div className="flex gap-4 justify-center flex-wrap">
           <Link
-            href="/admin/login"
+            href={`/${locale}/admin/login`}
             className="bg-white text-blue-600 px-8 py-4 rounded-lg text-xl font-semibold hover:bg-gray-100 transition shadow-lg"
           >
             🚀 ไปที่ Admin Panel

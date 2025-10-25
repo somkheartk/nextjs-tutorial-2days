@@ -1,7 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import {
+  Paper,
+  TextField,
+  MenuItem,
+  Button,
+  Box,
+  Typography,
+  Stack
+} from '@mui/material'
+import { Save, Cancel } from '@mui/icons-material'
 
 interface ProductFormProps {
   product?: {
@@ -17,6 +28,9 @@ interface ProductFormProps {
 
 export default function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const t = useTranslations()
   const [formData, setFormData] = useState({
     name: product?.name || '',
     price: product?.price || 0,
@@ -41,7 +55,7 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
       })
 
       if (res.ok) {
-        router.push('/admin/products')
+        router.push(`/${locale}/admin/products`)
         router.refresh()
       }
     } catch (error) {
@@ -51,87 +65,104 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
     }
   }
 
+  const categories = ['Electronics', 'Accessories', 'Furniture', 'Clothing', 'Books']
+  const statuses = ['active', 'inactive']
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Product Name</label>
-        <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+    <Paper elevation={2} sx={{ p: 4 }}>
+      <Typography variant="h5" component="h2" gutterBottom fontWeight="600">
+        {isEdit ? t('products.editProduct') : t('products.createProduct')}
+      </Typography>
+      
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Stack spacing={3}>
+          <TextField
+            fullWidth
+            label={t('products.name')}
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+            variant="outlined"
+          />
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Price ($)</label>
-        <input
-          type="number"
-          step="0.01"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+            <TextField
+              fullWidth
+              type="number"
+              label={t('products.price')}
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+              required
+              variant="outlined"
+              inputProps={{ step: '0.01', min: '0' }}
+            />
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Category</label>
-        <select
-          value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        >
-          <option value="">Select Category</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Accessories">Accessories</option>
-          <option value="Furniture">Furniture</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Books">Books</option>
-        </select>
-      </div>
+            <TextField
+              fullWidth
+              select
+              label={t('products.category')}
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              required
+              variant="outlined"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2 font-medium">Stock</label>
-        <input
-          type="number"
-          value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+            <TextField
+              fullWidth
+              type="number"
+              label={t('products.stock')}
+              value={formData.stock}
+              onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+              required
+              variant="outlined"
+              inputProps={{ min: '0' }}
+            />
 
-      <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium">Status</label>
-        <select
-          value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
+            <TextField
+              fullWidth
+              select
+              label={t('products.status')}
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              variant="outlined"
+            >
+              {statuses.map((status) => (
+                <MenuItem key={status} value={status}>
+                  {t(`common.${status}`)}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
-      <div className="flex gap-4">
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-blue-400"
-        >
-          {loading ? 'Saving...' : (isEdit ? 'Update Product' : 'Create Product')}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+          <Box className="flex gap-3">
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              startIcon={<Save />}
+              size="large"
+            >
+              {loading ? t('common.loading') : (isEdit ? t('products.updateProduct') : t('products.createProduct'))}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => router.back()}
+              startIcon={<Cancel />}
+              size="large"
+            >
+              {t('common.cancel')}
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
+    </Paper>
   )
 }
