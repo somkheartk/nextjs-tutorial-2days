@@ -5,21 +5,28 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import ProductForm from '@/components/admin/ProductForm'
 import { Typography, Box, CircularProgress } from '@mui/material'
+import { getProductById, Product } from '@/lib/api-service'
 
 export default function EditProductPage() {
   const params = useParams()
   const t = useTranslations()
-  const [product, setProduct] = useState(null)
+  const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/products/${params.id}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchProduct = async () => {
+      try {
+        // Using external API service instead of Next.js internal API
+        const data = await getProductById(Number(params.id))
         setProduct(data)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
         setLoading(false)
-      })
-      .catch(() => setLoading(false))
+      }
+    }
+    
+    fetchProduct()
   }, [params.id])
 
   if (loading) {

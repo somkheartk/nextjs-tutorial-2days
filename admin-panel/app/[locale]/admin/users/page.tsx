@@ -20,14 +20,7 @@ import {
   Typography
 } from '@mui/material'
 import { Edit, Delete, Add } from '@mui/icons-material'
-
-interface User {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: string
-}
+import { getUsers, deleteUser, User } from '@/lib/api-service'
 
 export default function UsersPage() {
   const params = useParams()
@@ -42,8 +35,8 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users')
-      const data = await res.json()
+      // Using external API service instead of Next.js internal API
+      const data = await getUsers()
       setUsers(data)
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -56,7 +49,8 @@ export default function UsersPage() {
     if (!confirm(t('common.confirmDelete', { item: t('users.title').toLowerCase() }))) return
 
     try {
-      await fetch(`/api/users/${id}`, { method: 'DELETE' })
+      // Using external API service instead of Next.js internal API
+      await deleteUser(id)
       setUsers(users.filter(u => u.id !== id))
     } catch (error) {
       console.error('Error deleting user:', error)

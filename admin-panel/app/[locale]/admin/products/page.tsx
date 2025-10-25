@@ -16,15 +16,7 @@ import {
   Chip
 } from '@mui/material'
 import { Edit, Delete, Add } from '@mui/icons-material'
-
-interface Product {
-  id: number
-  name: string
-  price: number
-  category: string
-  stock: number
-  status: string
-}
+import { getProducts, deleteProduct, Product } from '@/lib/api-service'
 
 export default function ProductsPage() {
   const params = useParams()
@@ -39,8 +31,8 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products')
-      const data = await res.json()
+      // Using external API service instead of Next.js internal API
+      const data = await getProducts()
       setProducts(data)
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -53,7 +45,8 @@ export default function ProductsPage() {
     if (!confirm(t('common.confirmDelete', { item: t('products.title').toLowerCase() }))) return
 
     try {
-      await fetch(`/api/products/${id}`, { method: 'DELETE' })
+      // Using external API service instead of Next.js internal API
+      await deleteProduct(id)
       setProducts(products.filter(p => p.id !== id))
     } catch (error) {
       console.error('Error deleting product:', error)
