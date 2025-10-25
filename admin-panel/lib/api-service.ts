@@ -155,8 +155,8 @@ export async function updateUser(id: number, userData: Partial<User>): Promise<U
     id: user.id || id,
     name: userData.name || user.name,
     email: userData.email || user.email,
-    role: userData.role,
-    status: userData.status,
+    role: userData.role || 'user',
+    status: userData.status || 'active',
   }
 }
 
