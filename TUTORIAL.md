@@ -1817,6 +1817,20 @@ CRUD คือการดำเนินการพื้นฐาน 4 อย
 | **U** | Update | แก้ไข | PUT/PATCH |
 | **D** | Delete | ลบ | DELETE |
 
+**💡 PUT vs PATCH:**
+- **PUT** = แทนที่ทั้งหมด (ส่งข้อมูลครบทุกฟิลด์)
+- **PATCH** = แก้ไขบางส่วน (ส่งเฉพาะฟิลด์ที่เปลี่ยน)
+
+```typescript
+// PUT - ต้องส่งข้อมูลครบทุกฟิลด์
+PUT /api/users/1
+{ name: "John", email: "john@example.com", role: "admin", status: "active" }
+
+// PATCH - ส่งเฉพาะที่เปลี่ยน
+PATCH /api/users/1
+{ status: "inactive" }  // แก้เฉพาะ status
+```
+
 **ตัวอย่างในชีวิตจริง (จัดการสมุดโทรศัพท์):**
 ```
 Create  = เพิ่มเบอร์ใหม่
@@ -2660,9 +2674,28 @@ npm run dev
 
 **16. CORS Error เมื่อเรียก External API**
 ```typescript
-// เพิ่ม headers ใน next.config.ts
+// เพิ่ม headers ใน next.config.js (JavaScript)
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE' },
+        ],
+      },
+    ]
+  },
+}
+
+module.exports = nextConfig
+
+// หรือ next.config.ts (TypeScript) - ไม่ต้องใส่ JSDoc
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   async headers() {
     return [
       {
@@ -2710,6 +2743,11 @@ DATABASE_URL=postgresql://...
 # ใช้ในโค้ด
 process.env.DATABASE_URL  // Server-side only
 process.env.NEXT_PUBLIC_API_URL  // Client + Server
+
+# ⚠️ สำคัญ: NEXT_PUBLIC_ Variables
+# - ตัวแปรที่ขึ้นต้นด้วย NEXT_PUBLIC_ จะถูก expose ไปยัง client-side
+# - อย่าใส่ข้อมูล sensitive (API keys, secrets) ใน NEXT_PUBLIC_*
+# - ใช้เฉพาะสำหรับข้อมูลที่ไม่เป็นความลับ (public API URLs, feature flags)
 ```
 
 **19. Build สำเร็จแต่ Deploy แล้วไม่ทำงาน**
@@ -2958,7 +2996,12 @@ export async function POST(request: Request) {
 // ❌ ไม่ดี: ไม่มี validation
 export async function POST(request: Request) {
   const body = await request.json()
-  await db.user.create(body)  // อันตราย!
+  await db.user.create(body)  // อันตราย! เสี่ยง SQL injection และข้อมูลไม่ถูกต้อง
+  
+  // ⚠️ ข้อควรระวัง:
+  // - SQL Injection: ใช้ parameterized queries หรือ ORM (Prisma, TypeORM)
+  // - Validate input ก่อนบันทึกลง database เสมอ
+  // - ใช้ library เช่น Zod, Yup สำหรับ validation
 }
 ```
 
@@ -3030,10 +3073,15 @@ describe('Button', () => {
 ### 10. Git Workflow
 
 ```bash
-# ✅ ดี: Commit messages ที่ดี
+# ✅ ดี: Commit messages ที่ดี (Conventional Commits)
 git commit -m "feat: add user delete functionality"
 git commit -m "fix: resolve navigation bug on mobile"
 git commit -m "docs: update README with setup instructions"
+
+# 💡 Conventional Commits Format:
+# <type>: <description>
+# Types: feat, fix, docs, style, refactor, test, chore
+# ประโยชน์: ใช้สำหรับ automated changelog และ semantic versioning
 
 # ❌ ไม่ดี
 git commit -m "update"
