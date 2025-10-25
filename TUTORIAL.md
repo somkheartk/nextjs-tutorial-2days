@@ -1806,6 +1806,60 @@ export async function POST(request: Request) {
 
 #### 2.5 User Management - CRUD (2 ชั่วโมง)
 
+**💡 พื้นฐาน: CRUD คืออะไร?**
+
+CRUD คือการดำเนินการพื้นฐาน 4 อย่างกับข้อมูล:
+
+| ตัวอักษร | ความหมาย | คำอธิบาย | HTTP Method |
+|---------|---------|---------|-------------|
+| **C** | Create | สร้าง/เพิ่ม | POST |
+| **R** | Read | อ่าน/ดู | GET |
+| **U** | Update | แก้ไข | PUT/PATCH |
+| **D** | Delete | ลบ | DELETE |
+
+**ตัวอย่างในชีวิตจริง (จัดการสมุดโทรศัพท์):**
+```
+Create  = เพิ่มเบอร์ใหม่
+Read    = ดูรายชื่อทั้งหมด หรือค้นหาเบอร์
+Update  = แก้ไขเบอร์หรือชื่อ
+Delete  = ลบเบอร์ที่ไม่ใช้แล้ว
+```
+
+**🎯 ขั้นตอนสร้าง CRUD สำหรับ Users:**
+
+1. **Create** - หน้าเพิ่ม user ใหม่ (Form)
+2. **Read** - หน้ารายการ users (Table/List)
+3. **Update** - หน้าแก้ไข user (Form เติมข้อมูลเดิม)
+4. **Delete** - ปุ่มลบ user (มี Confirmation)
+
+**💡 User Interface Design:**
+
+**1. List View (Read)** - แสดงรายการเป็นตาราง
+```
+[รายการ Users]
+
+┌────────────────────────────────────────────┐
+│  Name     │ Email       │ Role  │ Actions │
+├────────────────────────────────────────────┤
+│  John Doe │ john@...    │ Admin │ ✏️ 🗑️   │
+│  Jane     │ jane@...    │ User  │ ✏️ 🗑️   │
+└────────────────────────────────────────────┘
+
+[+ Add User] ← ปุ่มเพิ่ม
+```
+
+**2. Form View (Create/Update)** - ฟอร์มกรอกข้อมูล
+```
+[เพิ่ม User ใหม่]
+
+Name:     [_______________]
+Email:    [_______________]
+Role:     [▼ User        ]
+Status:   [▼ Active      ]
+
+[บันทึก] [ยกเลิก]
+```
+
 **User List Page:**
 ```typescript
 // app/admin/users/page.tsx
@@ -2395,6 +2449,325 @@ export default function Header() {
 4. **ถาม Community** - อย่ากลัวที่จะถาม
 5. **Follow Best Practices** - เรียนรู้วิธีเขียนโค้ดที่ดี
 
+**🔧 Troubleshooting Guide (แก้ปัญหาที่พบบ่อย)**
+
+### ปัญหาการติดตั้งและ Setup
+
+**1. `npm install` ช้ามาก หรือค้าง**
+```bash
+# ลองใช้ --legacy-peer-deps
+npm install --legacy-peer-deps
+
+# หรือลบแล้วติดตั้งใหม่
+rm -rf node_modules package-lock.json
+npm install
+
+# ลอง clear cache
+npm cache clean --force
+```
+
+**2. `npm run dev` ไม่ทำงาน**
+```bash
+# ตรวจสอบ Node.js version (ต้อง v18+)
+node --version
+
+# ลบ .next folder แล้ว restart
+rm -rf .next
+npm run dev
+
+# ถ้าใช้ Windows ลองใช้
+npx next dev
+```
+
+**3. Port 3000 ถูกใช้แล้ว**
+```bash
+# ใช้ port อื่น
+PORT=3001 npm run dev
+
+# หรือหาและปิดโปรแกรมที่ใช้ port 3000
+# Mac/Linux:
+lsof -ti:3000 | xargs kill -9
+
+# Windows:
+netstat -ano | findstr :3000
+taskkill /PID [PID_NUMBER] /F
+```
+
+### ปัญหา Build และ Compile
+
+**4. TypeScript Error: Cannot find module**
+```bash
+# ติดตั้ง types ที่ขาดหาย
+npm install --save-dev @types/node @types/react @types/react-dom
+
+# ลบ node_modules และติดตั้งใหม่
+rm -rf node_modules .next
+npm install
+```
+
+**5. `'use client'` ลืมใส่**
+
+**อาการ:**
+```
+Error: You're trying to use useState but this is a Server Component
+```
+
+**วิธีแก้:**
+```typescript
+'use client'  // ← เพิ่มบรรทัดนี้บรรทัดแรก
+
+import { useState } from 'react'
+// ...
+```
+
+**6. Build Error: Cannot read properties of undefined**
+```typescript
+// ❌ ไม่ดี: ไม่มีการตรวจสอบ
+<div>{user.name}</div>
+
+// ✅ ดี: มีการตรวจสอบ
+<div>{user?.name}</div>
+// หรือ
+{user && <div>{user.name}</div>}
+```
+
+### ปัญหา Routing และ Navigation
+
+**7. 404 Page Not Found แม้สร้าง page.tsx แล้ว**
+
+**สาเหตุที่พบบ่อย:**
+- ไฟล์ชื่อไม่ใช่ `page.tsx` (เช่น `Page.tsx`, `index.tsx`)
+- อยู่นอกโฟลเดอร์ `app/`
+- Typo ในชื่อโฟลเดอร์
+
+**ตรวจสอบ:**
+```
+✅ app/products/page.tsx    → /products
+❌ app/products/Page.tsx    → ไม่ทำงาน
+❌ app/products/index.tsx   → ไม่ทำงาน (ใช้ใน Pages Router)
+```
+
+**8. Dynamic Route ไม่ทำงาน**
+```
+❌ app/users/id/page.tsx           → ผิด
+✅ app/users/[id]/page.tsx         → ถูก
+✅ app/products/[slug]/page.tsx    → ถูก
+```
+
+**9. Link ไม่ทำงาน**
+```typescript
+// ❌ ไม่ดี: ใช้ <a> (refresh ทั้งหน้า)
+<a href="/about">About</a>
+
+// ✅ ดี: ใช้ Link component
+import Link from 'next/link'
+<Link href="/about">About</Link>
+```
+
+### ปัญหา State และ Data
+
+**10. State ไม่อัพเดต**
+```typescript
+// ❌ ผิด: แก้ state โดยตรง
+const [count, setCount] = useState(0)
+count++  // ไม่ทำงาน!
+
+// ✅ ถูก: ใช้ setter function
+setCount(count + 1)
+
+// ✅ ดีที่สุด: ใช้ callback
+setCount(prev => prev + 1)
+```
+
+**11. useEffect รันหลายครั้ง / Infinite Loop**
+```typescript
+// ❌ อันตราย: อาจเกิด infinite loop
+useEffect(() => {
+  fetchData()  // ถ้า fetchData เปลี่ยน state → re-render → fetchData อีก
+})
+
+// ✅ ถูก: ใส่ dependencies array
+useEffect(() => {
+  fetchData()
+}, [])  // รันครั้งเดียว
+
+// ✅ รันเมื่อ id เปลี่ยน
+useEffect(() => {
+  fetchData(id)
+}, [id])
+```
+
+**12. Data ไม่แสดง หรือแสดงช้า**
+```typescript
+// ❌ ไม่มี loading state
+const [data, setData] = useState(null)
+return <div>{data.name}</div>  // Error! data = null
+
+// ✅ มี loading และ null check
+const [data, setData] = useState(null)
+const [loading, setLoading] = useState(true)
+
+if (loading) return <div>Loading...</div>
+if (!data) return <div>No data</div>
+
+return <div>{data.name}</div>
+```
+
+### ปัญหา Styling
+
+**13. Tailwind CSS classes ไม่ทำงาน**
+
+**สาเหตุ:**
+- ไม่ได้ import globals.css
+- Typo ในชื่อ class
+- ใช้ dynamic class name (Tailwind purge ไป)
+
+**วิธีแก้:**
+```typescript
+// ❌ Dynamic class (อาจไม่ทำงาน)
+<div className={`text-${color}-600`}>Text</div>
+
+// ✅ ใช้ class เต็ม
+<div className={color === 'blue' ? 'text-blue-600' : 'text-red-600'}>
+  Text
+</div>
+
+// ✅ หรือใช้ style
+<div style={{ color: color }}>Text</div>
+```
+
+**14. CSS ไม่อัพเดต**
+```bash
+# ลบ .next และ restart
+rm -rf .next
+npm run dev
+
+# Hard refresh browser
+# Mac: Cmd + Shift + R
+# Windows: Ctrl + Shift + R
+```
+
+### ปัญหา API และ Data Fetching
+
+**15. API Route 404 Not Found**
+```
+❌ app/users/api/route.ts          → ผิด
+✅ app/api/users/route.ts          → ถูก
+
+❌ app/api/users/route.tsx         → ผิด (ต้อง .ts)
+✅ app/api/users/route.ts          → ถูก
+```
+
+**16. CORS Error เมื่อเรียก External API**
+```typescript
+// เพิ่ม headers ใน next.config.ts
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE' },
+        ],
+      },
+    ]
+  },
+}
+
+export default nextConfig
+```
+
+**17. fetch ไม่ทำงาน / Network Error**
+```typescript
+// ตรวจสอบ:
+// 1. URL ถูกต้องหรือไม่
+console.log('Fetching from:', '/api/users')
+
+// 2. API Route ทำงานหรือไม่ (เปิด browser → Network tab)
+
+// 3. ใช้ try-catch
+try {
+  const res = await fetch('/api/users')
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`)
+  }
+  const data = await res.json()
+} catch (error) {
+  console.error('Fetch error:', error)
+}
+```
+
+### ปัญหา Production และ Deployment
+
+**18. Environment Variables ไม่ทำงาน**
+```bash
+# สร้างไฟล์ .env.local
+NEXT_PUBLIC_API_URL=https://api.example.com
+DATABASE_URL=postgresql://...
+
+# ใช้ในโค้ด
+process.env.DATABASE_URL  // Server-side only
+process.env.NEXT_PUBLIC_API_URL  // Client + Server
+```
+
+**19. Build สำเร็จแต่ Deploy แล้วไม่ทำงาน**
+```bash
+# ทดสอบ production build ก่อน deploy
+npm run build
+npm start
+
+# ตรวจสอบ error ใน build log
+```
+
+**20. Image ไม่แสดงใน Production**
+```typescript
+// ❌ ไม่ดี: ใช้ <img> โดยตรง
+<img src="/logo.png" alt="Logo" />
+
+// ✅ ดี: ใช้ next/image
+import Image from 'next/image'
+<Image src="/logo.png" alt="Logo" width={200} height={50} />
+```
+
+### เทคนิคการ Debug
+
+**เครื่องมือที่ช่วย Debug:**
+
+1. **Console Logging**
+```typescript
+console.log('ค่าของ state:', count)
+console.table(users)  // แสดงเป็นตาราง
+console.error('Error:', error)
+```
+
+2. **React DevTools**
+- ติดตั้ง extension บน Chrome/Firefox
+- ดู Component tree, Props, State
+
+3. **Network Tab (Browser DevTools)**
+- F12 → Network tab
+- ดู API calls, Response, Status codes
+
+4. **VS Code Debugger**
+- ใส่ breakpoint
+- F5 เพื่อ run debugger
+
+**💡 เมื่อติดปัญหา:**
+
+1. **อ่าน Error Message** - มักบอกสาเหตุอยู่แล้ว
+2. **ใช้ Console.log** - ดูว่าข้อมูลเป็นอย่างไร
+3. **Search Google** - ใส่ error message ใน Google
+4. **ถาม ChatGPT** - อธิบายปัญหาและให้ code
+5. **ถาม Community** - Stack Overflow, Discord, Reddit
+
+**⚠️ ข้อควรระวัง:**
+- ลบ `console.log` ก่อน deploy
+- อย่า commit `node_modules/` และ `.env`
+- Backup code ก่อนลบอะไร
+- Git commit บ่อยๆ เพื่อสามารถ revert ได้
+
 ---
 
 ## 🎉 ยินดีด้วย!
@@ -2407,4 +2780,302 @@ export default function Header() {
 - เรียนรู้ advanced topics
 - แชร์ความรู้กับคนอื่น
 
+## 📖 Best Practices (แนวทางปฏิบัติที่ดี)
+
+### 1. โครงสร้างโค้ด
+
+**✅ ดี:**
+```
+app/
+├── admin/              # แยกส่วน admin ชัดเจน
+│   ├── dashboard/
+│   ├── users/
+│   └── products/
+├── api/               # API routes แยกชัดเจน
+└── (public)/          # Route groups สำหรับ public pages
+
+components/
+├── admin/             # Components เฉพาะ admin
+├── shared/            # Components ที่ใช้ร่วมกัน
+└── ui/                # UI components พื้นฐาน
+
+lib/
+├── api.ts             # API helper functions
+├── utils.ts           # Utility functions
+└── constants.ts       # Constants
+```
+
+### 2. การตั้งชื่อ
+
+**Component Names:**
+```typescript
+✅ UserCard.tsx       // PascalCase, descriptive
+❌ card.tsx          // ไม่สื่อความหมาย
+❌ UserCard.jsx      // ใช้ .tsx สำหรับ TypeScript
+```
+
+**Function Names:**
+```typescript
+✅ handleSubmit      // camelCase, บอกว่าทำอะไร
+✅ fetchUserData     // ขึ้นต้นด้วย verb (กริยา)
+❌ submit            // ไม่ชัดเจนว่าเป็น handler
+❌ getData           // ไม่สื่อว่า data อะไร
+```
+
+**Variable Names:**
+```typescript
+✅ const isLoading = true      // boolean ขึ้นต้นด้วย is/has/should
+✅ const userName = 'John'     // descriptive
+✅ const MAX_USERS = 100       // constants เป็นตัวพิมพ์ใหญ่
+❌ const data = []             // ไม่สื่อความหมาย
+❌ const x = true              // ชื่อสั้นเกิน
+```
+
+### 3. TypeScript Types
+
+```typescript
+// ✅ ดี: กำหนด interface ชัดเจน
+interface User {
+  id: number
+  name: string
+  email: string
+  role: 'admin' | 'user' | 'moderator'  // Union types
+  createdAt: Date
+}
+
+// ✅ ดี: ใช้ type สำหรับ props
+interface UserCardProps {
+  user: User
+  onEdit?: (id: number) => void  // Optional
+  onDelete?: (id: number) => void
+}
+
+// ❌ ไม่ดี: ใช้ any
+function getUser(id: any): any {
+  // ...
+}
+```
+
+### 4. Component Organization
+
+```typescript
+// ✅ ดี: มี structure ชัดเจน
+export default function UserCard({ user, onEdit, onDelete }: UserCardProps) {
+  // 1. Hooks
+  const [isExpanded, setIsExpanded] = useState(false)
+  
+  // 2. Functions
+  const handleToggle = () => setIsExpanded(!isExpanded)
+  
+  // 3. Render logic
+  if (!user) return null
+  
+  // 4. JSX
+  return (
+    <div>
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+### 5. Error Handling
+
+```typescript
+// ✅ ดี: มี error handling ครบถ้วน
+async function fetchUsers() {
+  try {
+    setLoading(true)
+    setError(null)
+    
+    const response = await fetch('/api/users')
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    setUsers(data)
+  } catch (error) {
+    console.error('Fetch users error:', error)
+    setError(error instanceof Error ? error.message : 'Unknown error')
+  } finally {
+    setLoading(false)
+  }
+}
+
+// ❌ ไม่ดี: ไม่มี error handling
+async function fetchUsers() {
+  const response = await fetch('/api/users')
+  const data = await response.json()
+  setUsers(data)
+}
+```
+
+### 6. Performance
+
+**ใช้ useMemo และ useCallback:**
+```typescript
+// ✅ ดี: ใช้ useMemo สำหรับ expensive calculations
+const filteredUsers = useMemo(() => {
+  return users.filter(user => user.role === 'admin')
+}, [users])
+
+// ✅ ดี: ใช้ useCallback สำหรับ functions
+const handleDelete = useCallback((id: number) => {
+  deleteUser(id)
+}, [])
+```
+
+**Lazy Loading:**
+```typescript
+// ✅ ดี: Lazy load components
+import dynamic from 'next/dynamic'
+
+const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
+  loading: () => <div>Loading...</div>
+})
+```
+
+### 7. Security
+
+```typescript
+// ✅ ดี: Validate input
+export async function POST(request: Request) {
+  const body = await request.json()
+  
+  // Validation
+  if (!body.email || !isValidEmail(body.email)) {
+    return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
+  }
+  
+  // Sanitize
+  const cleanEmail = body.email.trim().toLowerCase()
+  
+  // ...
+}
+
+// ❌ ไม่ดี: ไม่มี validation
+export async function POST(request: Request) {
+  const body = await request.json()
+  await db.user.create(body)  // อันตราย!
+}
+```
+
+**Environment Variables:**
+```typescript
+// ✅ ดี: ใช้ env variables
+const apiKey = process.env.API_KEY  // Server-side only
+const publicUrl = process.env.NEXT_PUBLIC_API_URL  // Client-side accessible
+
+// ❌ ไม่ดี: hardcode secrets
+const apiKey = 'sk_live_abc123...'  // อย่าทำ!
+```
+
+### 8. Accessibility (a11y)
+
+```typescript
+// ✅ ดี: มี aria labels และ semantic HTML
+<button
+  onClick={handleDelete}
+  aria-label="Delete user"
+  className="..."
+>
+  <TrashIcon />
+</button>
+
+<nav aria-label="Main navigation">
+  {/* menu items */}
+</nav>
+
+// ✅ ดี: ใช้ semantic HTML
+<main>
+  <article>
+    <header>...</header>
+    <section>...</section>
+  </article>
+</main>
+
+// ❌ ไม่ดี: div soup
+<div>
+  <div>
+    <div>...</div>
+  </div>
+</div>
+```
+
+### 9. Testing (สำหรับขั้นสูง)
+
+```typescript
+// ตัวอย่าง test ด้วย Jest + React Testing Library
+import { render, screen, fireEvent } from '@testing-library/react'
+import Button from '@/components/Button'
+
+describe('Button', () => {
+  it('renders correctly', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByText('Click me')).toBeInTheDocument()
+  })
+  
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn()
+    render(<Button onClick={handleClick}>Click me</Button>)
+    
+    fireEvent.click(screen.getByText('Click me'))
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+})
+```
+
+### 10. Git Workflow
+
+```bash
+# ✅ ดี: Commit messages ที่ดี
+git commit -m "feat: add user delete functionality"
+git commit -m "fix: resolve navigation bug on mobile"
+git commit -m "docs: update README with setup instructions"
+
+# ❌ ไม่ดี
+git commit -m "update"
+git commit -m "fix bug"
+git commit -m "asdfasdf"
+
+# ✅ ดี: .gitignore
+node_modules/
+.next/
+.env.local
+.DS_Store
+*.log
+
+# Branch naming
+feature/user-management
+fix/login-redirect
+hotfix/security-patch
+```
+
+### 📚 คำแนะนำสุดท้าย
+
+**สำหรับมือใหม่:**
+1. เริ่มจากสิ่งง่ายๆ อย่าพยายามใช้ทุกอย่างพร้อมกัน
+2. เรียนรู้พื้นฐานให้แม่นก่อนไปขั้นสูง
+3. ทำโปรเจกต์เล็กๆ เสร็จแล้วค่อยทำใหญ่ขึ้น
+4. อย่ากลัวผิด - ทุกคนเคยเป็นมือใหม่
+
+**สำหรับที่กำลังพัฒนา:**
+1. Review โค้ดตัวเองอยู่เสมอ
+2. Refactor เมื่อโค้ดซับซ้อน
+3. เขียน Documentation
+4. แชร์ความรู้กับคนอื่น
+
+**สำหรับที่จะขั้นสูง:**
+1. เรียนรู้ Design Patterns
+2. ศึกษา Architecture (Clean Architecture, Microservices)
+3. เรียนรู้ Testing (TDD, E2E)
+4. Performance Optimization
+5. Security Best Practices
+
+---
+
 **Happy Coding! 🚀**
+
+*"The only way to learn programming is by writing programs." - Dennis Ritchie*
