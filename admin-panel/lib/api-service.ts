@@ -7,6 +7,44 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://jsonplaceholder.typicode.com'
 const AUTH_API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'https://dummyjson.com'
 
+// ============================================
+// External API Response Types
+// ============================================
+
+interface JSONPlaceholderUser {
+  id: number
+  name: string
+  email: string
+  username?: string
+  phone?: string
+  website?: string
+}
+
+interface DummyJSONProduct {
+  id: number
+  title: string
+  price: number
+  category: string
+  stock: number
+  description?: string
+}
+
+interface DummyJSONProductsResponse {
+  products: DummyJSONProduct[]
+  total?: number
+  skip?: number
+  limit?: number
+}
+
+interface DummyJSONAuthResponse {
+  id?: number
+  username?: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  token?: string
+}
+
 /**
  * Generic API call helper
  */
@@ -51,7 +89,7 @@ export interface User {
  */
 export async function getUsers(): Promise<User[]> {
   // Using JSONPlaceholder users endpoint
-  const users = await apiCall<any[]>(`${API_BASE_URL}/users`)
+  const users = await apiCall<JSONPlaceholderUser[]>(`${API_BASE_URL}/users`)
   
   // Transform external API data to match our app's User interface
   return users.map(user => ({
@@ -70,7 +108,7 @@ export async function getUsers(): Promise<User[]> {
  * Get a single user by ID
  */
 export async function getUserById(id: number): Promise<User> {
-  const user = await apiCall<any>(`${API_BASE_URL}/users/${id}`)
+  const user = await apiCall<JSONPlaceholderUser>(`${API_BASE_URL}/users/${id}`)
   
   return {
     id: user.id,
@@ -89,7 +127,7 @@ export async function getUserById(id: number): Promise<User> {
  */
 export async function createUser(userData: Partial<User>): Promise<User> {
   // JSONPlaceholder simulates POST but doesn't persist data
-  const user = await apiCall<any>(`${API_BASE_URL}/users`, {
+  const user = await apiCall<JSONPlaceholderUser>(`${API_BASE_URL}/users`, {
     method: 'POST',
     body: JSON.stringify(userData),
   })
@@ -108,7 +146,7 @@ export async function createUser(userData: Partial<User>): Promise<User> {
  */
 export async function updateUser(id: number, userData: Partial<User>): Promise<User> {
   // JSONPlaceholder simulates PUT/PATCH but doesn't persist data
-  const user = await apiCall<any>(`${API_BASE_URL}/users/${id}`, {
+  const user = await apiCall<JSONPlaceholderUser>(`${API_BASE_URL}/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(userData),
   })
@@ -117,8 +155,8 @@ export async function updateUser(id: number, userData: Partial<User>): Promise<U
     id: user.id || id,
     name: userData.name || user.name,
     email: userData.email || user.email,
-    role: userData.role || user.role,
-    status: userData.status || user.status,
+    role: userData.role,
+    status: userData.status,
   }
 }
 
@@ -127,7 +165,7 @@ export async function updateUser(id: number, userData: Partial<User>): Promise<U
  */
 export async function deleteUser(id: number): Promise<void> {
   // JSONPlaceholder simulates DELETE but doesn't persist data
-  await apiCall(`${API_BASE_URL}/users/${id}`, {
+  await apiCall<Record<string, never>>(`${API_BASE_URL}/users/${id}`, {
     method: 'DELETE',
   })
 }
@@ -152,11 +190,11 @@ export interface Product {
  */
 export async function getProducts(): Promise<Product[]> {
   // Using DummyJSON products endpoint which has better data structure
-  const response = await apiCall<any>(`${AUTH_API_URL}/products?limit=20`)
+  const response = await apiCall<DummyJSONProductsResponse>(`${AUTH_API_URL}/products?limit=20`)
   const products = response.products || []
   
   // Transform external API data to match our app's Product interface
-  return products.map((product: any) => ({
+  return products.map((product) => ({
     id: product.id,
     name: product.title,
     price: product.price,
@@ -172,7 +210,7 @@ export async function getProducts(): Promise<Product[]> {
  * Get a single product by ID
  */
 export async function getProductById(id: number): Promise<Product> {
-  const product = await apiCall<any>(`${AUTH_API_URL}/products/${id}`)
+  const product = await apiCall<DummyJSONProduct>(`${AUTH_API_URL}/products/${id}`)
   
   return {
     id: product.id,
@@ -191,7 +229,7 @@ export async function getProductById(id: number): Promise<Product> {
  */
 export async function createProduct(productData: Partial<Product>): Promise<Product> {
   // DummyJSON simulates POST
-  const product = await apiCall<any>(`${AUTH_API_URL}/products/add`, {
+  const product = await apiCall<DummyJSONProduct>(`${AUTH_API_URL}/products/add`, {
     method: 'POST',
     body: JSON.stringify({
       title: productData.name,
@@ -216,7 +254,7 @@ export async function createProduct(productData: Partial<Product>): Promise<Prod
  */
 export async function updateProduct(id: number, productData: Partial<Product>): Promise<Product> {
   // DummyJSON simulates PUT
-  const product = await apiCall<any>(`${AUTH_API_URL}/products/${id}`, {
+  const product = await apiCall<DummyJSONProduct>(`${AUTH_API_URL}/products/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
       title: productData.name,
@@ -232,7 +270,7 @@ export async function updateProduct(id: number, productData: Partial<Product>): 
     price: product.price || productData.price || 0,
     category: product.category || productData.category || '',
     stock: product.stock || productData.stock || 0,
-    status: productData.status || product.status || 'active',
+    status: productData.status || 'active',
   }
 }
 
@@ -241,7 +279,7 @@ export async function updateProduct(id: number, productData: Partial<Product>): 
  */
 export async function deleteProduct(id: number): Promise<void> {
   // DummyJSON simulates DELETE
-  await apiCall(`${AUTH_API_URL}/products/${id}`, {
+  await apiCall<Record<string, never>>(`${AUTH_API_URL}/products/${id}`, {
     method: 'DELETE',
   })
 }
@@ -264,10 +302,10 @@ export interface AuthResponse {
 /**
  * Login with external authentication API
  */
-export async function login(email: string, password: string): Promise<AuthResponse> {
+export async function login(email: string, _password: string): Promise<AuthResponse> {
   try {
     // Using DummyJSON auth endpoint
-    const response = await apiCall<any>(`${AUTH_API_URL}/auth/login`, {
+    const response = await apiCall<DummyJSONAuthResponse>(`${AUTH_API_URL}/auth/login`, {
       method: 'POST',
       body: JSON.stringify({
         username: 'emilys', // DummyJSON uses username
@@ -282,7 +320,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
         token: response.token,
         user: {
           email: response.email || email,
-          name: `${response.firstName} ${response.lastName}` || 'Admin User',
+          name: `${response.firstName || ''} ${response.lastName || ''}`.trim() || 'Admin User',
           role: 'admin',
         },
       }

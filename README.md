@@ -72,10 +72,10 @@ npm run dev
 
 ### Demo Credentials
 
-สำหรับทดสอบระบบ Login:
+สำหรับทดสอบระบบ Login (ใช้กับ External API):
 ```
-Email: admin@example.com
-Password: password
+Username: emilys (หรือ email อะไรก็ได้)
+Password: emilyspass (หรือ password อะไรก็ได้)
 ```
 
 ## 📂 โครงสร้างโปรเจกต์
