@@ -2,7 +2,7 @@
 
 ## 🎯 เกี่ยวกับคอร์สนี้
 
-คอร์สเรียน Next.js แบบเข้มข้น ออกแบบมาให้เรียนจบภายใน 2 วัน สำหรับผู้ที่ต้องการเรียนรู้ Next.js ตั้งแต่เริ่มต้นจนสามารถสร้าง Admin Panel ที่สมบูรณ์
+คอร์สเรียน Next.js แบบเข้มข้น ออกแบบมาให้เรียนจบภายใน 2 วัน สำหรับผู้ที่ต้องการเรียนรู้ Next.js ตั้งแต่เริ่มต้นจนสามารถสร้าง Admin Panel ที่สมบูรณ์ พร้อมโครงสร้างมืออาชีพ
 
 ### ✨ คุณจะได้เรียนรู้
 
@@ -12,12 +12,36 @@
 - 📊 **Admin Dashboard** - สร้าง Dashboard ที่สวยงาม
 - 🛠️ **CRUD Operations** - จัดการ Users และ Products
 - 📱 **Responsive Design** - รองรับทุกหน้าจอ
-- 🚀 **API Routes** - สร้าง Backend API
+- 🚀 **API Service Pattern** - การเชื่อมต่อ API แบบมืออาชีพ
+- 🏗️ **Professional Architecture** - โครงสร้างโค้ดที่เป็นมาตรฐาน
 
-## 📖 คู่มือต่างๆ
+## 📖 คู่มือการเรียนรู้
 
-- **[🚀 Quick Start Guide](./QUICKSTART.md)** - เริ่มต้นใช้งานอย่างรวดเร็ว
-- **[📚 Full Tutorial](./TUTORIAL.md)** - คอร์สเรียนฉบับสมบูรณ์
+### 📚 Tutorial แบบแบ่งวัน (แนะนำ)
+
+เรียนรู้ทีละขั้นตอน แบ่งเป็น 2 วัน + หัวข้อขั้นสูง:
+
+- **[📅 Day 1: Next.js Fundamentals](./tutorials/DAY1.md)** (8 ชั่วโมง)
+  - พื้นฐาน Next.js, Components, Routing
+  - Styling ด้วย Tailwind CSS
+  - State Management & API Routes
+
+- **[📅 Day 2: Admin Panel Development](./tutorials/DAY2.md)** (8 ชั่วโมง)
+  - สร้าง Admin Layout & Dashboard
+  - Authentication System
+  - CRUD Operations (Users & Products)
+  - Service Pattern สำหรับ API
+
+- **[🚀 Advanced Topics](./tutorials/ADVANCED.md)**
+  - Database Integration (Prisma)
+  - Advanced Authentication (NextAuth.js)
+  - State Management (Zustand, React Query)
+  - Testing, Deployment และอื่นๆ
+
+### 📖 เอกสารเพิ่มเติม
+
+- **[🚀 Quick Start Guide](./QUICKSTART.md)** - เริ่มต้นใช้งานอย่างรวดเร็ว (5 นาที)
+- **[📚 Full Tutorial](./TUTORIAL.md)** - คอร์สเรียนฉบับสมบูรณ์ (แบบเดิม)
 - **[☁️ Deployment Guide](./DEPLOYMENT.md)** - คู่มือการ Deploy
 
 ## 🚀 เริ่มต้นใช้งาน
@@ -47,17 +71,68 @@ npm run dev
 
 เปิดเบราว์เซอร์ที่ `http://localhost:3000`
 
-## 📖 เริ่มเรียนรู้
+## 🏗️ โครงสร้างมืออาชีพ
 
-### 📅 วันที่ 1 (8 ชั่วโมง)
-- **ช่วงเช้า**: พื้นฐาน Next.js, Routing, Components
-- **ช่วงบ่าย**: Styling, State Management, API Routes
+โปรเจกต์นี้ใช้โครงสร้างแบบมืออาชีพ พร้อม **Service Pattern** สำหรับการเชื่อมต่อ API:
 
-### 📅 วันที่ 2 (8 ชั่วโมง)
-- **ช่วงเช้า**: Admin Layout, Dashboard, Authentication
-- **ช่วงบ่าย**: User Management, Product Management, Polish
+```
+admin-panel/
+├── app/                    # Next.js App Router
+│   ├── admin/             # Admin Panel routes
+│   └── api/               # API routes (proxy layer)
+├── components/            # React components
+│   └── admin/             # Admin-specific components
+├── lib/
+│   ├── api-service.ts     # 🎯 API Service Layer
+│   ├── constants/         # Constants and configs
+│   └── AdminContext.tsx   # Context providers
+└── messages/              # i18n translations
+```
 
-👉 อ่านเอกสารคอร์สฉบับเต็มได้ที่: **[TUTORIAL.md](./TUTORIAL.md)**
+### 🎯 API Service Pattern
+
+โปรเจกต์นี้ใช้ **Service Pattern** สำหรับจัดการ API:
+
+```typescript
+// lib/api-service.ts - Centralized API management
+export async function getUsers(): Promise<User[]> {
+  // เชื่อมต่อกับ External API
+  const response = await apiCall<User[]>(`${API_BASE_URL}/users`)
+  return response
+}
+
+export async function createUser(userData: Partial<User>): Promise<User> {
+  return await apiCall<User>(`${API_BASE_URL}/users`, {
+    method: 'POST',
+    body: JSON.stringify(userData)
+  })
+}
+```
+
+**ข้อดีของ Service Pattern:**
+- ✅ แยก business logic ออกจาก UI
+- ✅ ง่ายต่อการ maintain และ test
+- ✅ Reusable across components
+- ✅ Centralized error handling
+- ✅ Type-safe with TypeScript
+
+## 📅 แผนการเรียนรู้
+
+### วันที่ 1: Next.js Fundamentals
+- พื้นฐาน Next.js, Routing, Components
+- Styling ด้วย Tailwind CSS
+- State Management & API Routes
+
+### วันที่ 2: Admin Panel Development
+- Admin Layout, Dashboard, Authentication
+- CRUD Operations with Service Pattern
+- User & Product Management
+
+### Advanced: ยกระดับสู่ Production
+- Database Integration, Advanced Auth
+- Testing, Performance, Deployment
+
+👉 เริ่มเรียนเลย: **[Day 1 Tutorial](./tutorials/DAY1.md)**
 
 ## 🎨 Features
 
@@ -89,7 +164,7 @@ admin-panel/
 │   │   ├── products/       # Product Management
 │   │   ├── login/          # หน้า Login
 │   │   └── layout.tsx      # Admin Layout
-│   ├── api/                # API Routes
+│   ├── api/                # API Routes (Proxy Layer)
 │   │   ├── auth/           # Authentication APIs
 │   │   ├── users/          # User APIs
 │   │   └── products/       # Product APIs
@@ -97,10 +172,37 @@ admin-panel/
 │   └── page.tsx            # หน้าแรก
 ├── components/             # React Components
 │   └── admin/              # Admin Components
-├── lib/                    # Utility Functions
-├── types/                  # TypeScript Types
+├── lib/                    # Core Libraries
+│   ├── api-service.ts      # 🎯 API Service Layer (Main)
+│   ├── AdminContext.tsx    # Admin Context
+│   └── constants/          # Constants
+├── messages/               # i18n Translations
+│   ├── en.json
+│   └── th.json
 └── public/                 # Static Files
 ```
+
+### 🎯 Key Architecture Features
+
+1. **Service Layer Pattern** (`lib/api-service.ts`)
+   - Centralized API management
+   - Type-safe API calls
+   - Error handling & retry logic
+   - External API integration
+
+2. **Component-based Architecture**
+   - Reusable components
+   - Clear separation of concerns
+   - Admin-specific components
+
+3. **Internationalization (i18n)**
+   - Multi-language support (EN/TH)
+   - Next-intl integration
+
+4. **Professional Code Structure**
+   - TypeScript for type safety
+   - ESLint for code quality
+   - Organized folder structure
 
 ## 🛠️ เทคโนโลジีที่ใช้
 
