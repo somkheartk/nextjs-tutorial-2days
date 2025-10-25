@@ -14,14 +14,15 @@ import {
 } from '@mui/material'
 import { Save, Cancel } from '@mui/icons-material'
 import { USER_ROLES, STATUSES } from '@/lib/constants'
+import { createUser, updateUser } from '@/lib/api-service'
 
 interface UserFormProps {
   user?: {
     id?: number
     name: string
     email: string
-    role: string
-    status: string
+    role?: string
+    status?: string
   }
   isEdit?: boolean
 }
@@ -43,20 +44,16 @@ export default function UserForm({ user, isEdit = false }: UserFormProps) {
     e.preventDefault()
     setLoading(true)
 
-    const url = isEdit ? `/api/users/${user?.id}` : '/api/users'
-    const method = isEdit ? 'PUT' : 'POST'
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (res.ok) {
-        router.push(`/${locale}/admin/users`)
-        router.refresh()
+      // Using external API service instead of Next.js internal API
+      if (isEdit && user?.id) {
+        await updateUser(user.id, formData)
+      } else {
+        await createUser(formData)
       }
+      
+      router.push(`/${locale}/admin/users`)
+      router.refresh()
     } catch (error) {
       console.error('Error:', error)
     } finally {

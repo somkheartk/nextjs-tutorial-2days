@@ -5,21 +5,28 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import UserForm from '@/components/admin/UserForm'
 import { Typography, Box, CircularProgress } from '@mui/material'
+import { getUserById, User } from '@/lib/api-service'
 
 export default function EditUserPage() {
   const params = useParams()
   const t = useTranslations()
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/users/${params.id}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchUser = async () => {
+      try {
+        // Using external API service instead of Next.js internal API
+        const data = await getUserById(Number(params.id))
         setUser(data)
+      } catch (error) {
+        console.error('Error fetching user:', error)
+      } finally {
         setLoading(false)
-      })
-      .catch(() => setLoading(false))
+      }
+    }
+    
+    fetchUser()
   }, [params.id])
 
   if (loading) {

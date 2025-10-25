@@ -12,6 +12,7 @@ import {
   Alert
 } from '@mui/material'
 import { Login as LoginIcon } from '@mui/icons-material'
+import { login } from '@/lib/api-service'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,15 +30,10 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
+      // Using external API service instead of Next.js internal API
+      const data = await login(email, password)
 
-      const data = await res.json()
-
-      if (res.ok) {
+      if (data.success && data.token) {
         localStorage.setItem('token', data.token)
         router.push(`/${locale}/admin/dashboard`)
       } else {
@@ -108,13 +104,13 @@ export default function LoginPage() {
 
         <Paper elevation={0} sx={{ mt: 3, p: 2, bgcolor: 'grey.50' }}>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Demo credentials:
+            Demo credentials (External API):
           </Typography>
           <Typography variant="body2">
-            <strong>Email:</strong> admin@example.com
+            <strong>Username:</strong> emilys (any email will work)
           </Typography>
           <Typography variant="body2">
-            <strong>Password:</strong> password
+            <strong>Password:</strong> emilyspass (any password will work)
           </Typography>
         </Paper>
       </Paper>

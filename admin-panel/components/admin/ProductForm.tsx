@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { Save, Cancel } from '@mui/icons-material'
 import { PRODUCT_CATEGORIES, STATUSES } from '@/lib/constants'
+import { createProduct, updateProduct } from '@/lib/api-service'
 
 interface ProductFormProps {
   product?: {
@@ -45,20 +46,16 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
     e.preventDefault()
     setLoading(true)
 
-    const url = isEdit ? `/api/products/${product?.id}` : '/api/products'
-    const method = isEdit ? 'PUT' : 'POST'
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (res.ok) {
-        router.push(`/${locale}/admin/products`)
-        router.refresh()
+      // Using external API service instead of Next.js internal API
+      if (isEdit && product?.id) {
+        await updateProduct(product.id, formData)
+      } else {
+        await createProduct(formData)
       }
+      
+      router.push(`/${locale}/admin/products`)
+      router.refresh()
     } catch (error) {
       console.error('Error:', error)
     } finally {
