@@ -1,8 +1,9 @@
 'use client'
 
 import StatsCard from '@/components/admin/StatsCard'
+import RecentActivities from '@/components/admin/RecentActivities'
 import { useTranslations } from 'next-intl'
-import { Paper, Typography, Box, Divider } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { People, Inventory, ShoppingCart, AttachMoney } from '@mui/icons-material'
 
 export default function DashboardPage() {
@@ -34,31 +35,7 @@ export default function DashboardPage() {
         ))}
       </Box>
 
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <Typography variant="h6" component="h2" fontWeight="600" gutterBottom>
-          Recent Activities
-        </Typography>
-        <Box className="space-y-3 mt-4">
-          {recentActivities.map((activity, index) => (
-            <Box key={activity.id}>
-              <Box className="flex items-center justify-between py-2">
-                <Box>
-                  <Typography variant="body1" fontWeight="500">
-                    {activity.action}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    by {activity.user}
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {activity.time}
-                </Typography>
-              </Box>
-              {index < recentActivities.length - 1 && <Divider />}
-            </Box>
-          ))}
-        </Box>
-      </Paper>
+      <RecentActivities activities={recentActivities} />
     </Box>
   )
 }

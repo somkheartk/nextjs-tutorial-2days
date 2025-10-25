@@ -28,7 +28,9 @@
     "totalUsers": "ผู้ใช้ทั้งหมด",
     "totalProducts": "สินค้าทั้งหมด",
     "activeUsers": "ผู้ใช้ที่ใช้งาน",
-    "lowStock": "สินค้าใกล้หมด"
+    "lowStock": "สินค้าใกล้หมด",
+    "recentActivities": "กิจกรรมล่าสุด",
+    "noActivities": "ไม่มีกิจกรรมล่าสุด"
   },
   "users": {
     "title": "ผู้ใช้",

@@ -28,7 +28,9 @@
     "totalUsers": "Total Users",
     "totalProducts": "Total Products",
     "activeUsers": "Active Users",
-    "lowStock": "Low Stock Products"
+    "lowStock": "Low Stock Products",
+    "recentActivities": "Recent Activities",
+    "noActivities": "No recent activities"
   },
   "users": {
     "title": "Users",

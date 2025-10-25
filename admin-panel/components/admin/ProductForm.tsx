@@ -13,6 +13,7 @@ import {
   Stack
 } from '@mui/material'
 import { Save, Cancel } from '@mui/icons-material'
+import { PRODUCT_CATEGORIES, STATUSES } from '@/lib/constants'
 
 interface ProductFormProps {
   product?: {
@@ -65,9 +66,6 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
     }
   }
 
-  const categories = ['Electronics', 'Accessories', 'Furniture', 'Clothing', 'Books']
-  const statuses = ['active', 'inactive']
-
   return (
     <Paper elevation={2} sx={{ p: 4 }}>
       <Typography variant="h5" component="h2" gutterBottom fontWeight="600">
@@ -106,7 +104,7 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
               required
               variant="outlined"
             >
-              {categories.map((category) => (
+              {PRODUCT_CATEGORIES.map((category) => (
                 <MenuItem key={category} value={category}>
                   {category}
                 </MenuItem>
@@ -134,7 +132,7 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               variant="outlined"
             >
-              {statuses.map((status) => (
+              {STATUSES.map((status) => (
                 <MenuItem key={status} value={status}>
                   {t(`common.${status}`)}
                 </MenuItem>
