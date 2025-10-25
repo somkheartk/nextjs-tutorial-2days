@@ -877,47 +877,281 @@ export default function TitleChanger() {
 
 #### 1.8 API Routes (1.5 ชั่วโมง)
 
-Next.js ให้เราสร้าง API ได้ในตัว:
+**💡 พื้นฐาน: API คืออะไร?**
+
+API (Application Programming Interface) คือช่องทางสื่อสารระหว่าง Frontend กับ Backend:
+
+```
+Frontend (หน้าบ้าน)  ←→  API (ประตู)  ←→  Backend/Database (หลังบ้าน)
+   React/Next.js              ↕              ข้อมูล, ฐานข้อมูล
+```
+
+**ตัวอย่างในชีวิตจริง:**
+```
+เหมือนสั่งอาหารที่ร้าน:
+1. คุณ (Frontend) = บอกพนักงาน "ขอข้าวผัด 1 จาน"
+2. พนักงาน (API) = ส่งออเดอร์ไปครัว
+3. ครัว (Backend) = ทำอาหาร
+4. พนักงาน (API) = เอาอาหารมาให้
+5. คุณ (Frontend) = ได้รับอาหาร
+```
+
+**🌐 HTTP Methods (คำสั่งหลัก)**
+
+| Method | ความหมาย | ใช้งาน |
+|--------|---------|--------|
+| GET | อ่าน/ดึงข้อมูล | ดูรายการ, ดูรายละเอียด |
+| POST | สร้าง | เพิ่มข้อมูลใหม่ |
+| PUT | แก้ไข (ทั้งหมด) | อัพเดตข้อมูล |
+| PATCH | แก้ไข (บางส่วน) | อัพเดตบางฟิลด์ |
+| DELETE | ลบ | ลบข้อมูล |
+
+**💡 REST API Naming Convention:**
+```
+GET    /api/users       → ดูรายการ users ทั้งหมด
+GET    /api/users/123   → ดู user ID 123
+POST   /api/users       → สร้าง user ใหม่
+PUT    /api/users/123   → แก้ไข user ID 123
+DELETE /api/users/123   → ลบ user ID 123
+```
+
+**🚀 API Routes ใน Next.js**
+
+Next.js ให้เราสร้าง API ได้ในตัว ไม่ต้องแยก Backend:
+- สร้างไฟล์ `route.ts` ในโฟลเดอร์ `app/api/`
+- แต่ละ HTTP Method = 1 Function
+- Return ด้วย `NextResponse.json()`
+
+**โครงสร้างไฟล์:**
+```
+app/
+└── api/
+    ├── users/
+    │   ├── route.ts           → /api/users
+    │   └── [id]/
+    │       └── route.ts       → /api/users/:id
+    └── products/
+        └── route.ts           → /api/products
+```
+
+**ตัวอย่างที่ 1: GET Request (ดึงข้อมูล)**
 
 ```typescript
 // app/api/users/route.ts
 import { NextResponse } from 'next/server'
 
-// GET /api/users
+// GET /api/users - ดูรายการ users ทั้งหมด
 export async function GET() {
+  // Mock data (ในโปรเจกต์จริงจะดึงจาก Database)
   const users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'user' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'user' }
   ]
   
+  // Return JSON response
   return NextResponse.json(users)
-}
-
-// POST /api/users
-export async function POST(request: Request) {
-  const body = await request.json()
-  
-  // TODO: Save to database
-  
-  return NextResponse.json({ success: true, data: body })
 }
 ```
 
-**Dynamic API Route:**
+**🔍 อธิบาย:**
+- `export async function GET()` = สร้าง endpoint GET
+- `NextResponse.json(data)` = return ข้อมูลเป็น JSON
+- เมื่อเรียก `fetch('/api/users')` จะได้ array ของ users
+
+**ตัวอย่างที่ 2: POST Request (สร้างข้อมูล)**
+
+```typescript
+// app/api/users/route.ts
+import { NextResponse } from 'next/server'
+
+// Mock data storage (ในโปรเจกต์จริงใช้ Database)
+let users = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'user' }
+]
+
+// GET /api/users
+export async function GET() {
+  return NextResponse.json(users)
+}
+
+// POST /api/users - สร้าง user ใหม่
+export async function POST(request: Request) {
+  // 1. อ่านข้อมูลจาก request body
+  const body = await request.json()
+  
+  // 2. Validate (ตรวจสอบความถูกต้อง)
+  if (!body.name || !body.email) {
+    return NextResponse.json(
+      { error: 'ต้องระบุ name และ email' },
+      { status: 400 }  // Bad Request
+    )
+  }
+  
+  // 3. สร้าง user ใหม่
+  const newUser = {
+    id: users.length + 1,
+    name: body.name,
+    email: body.email,
+    role: body.role || 'user'  // Default role
+  }
+  
+  // 4. เพิ่มเข้า array
+  users.push(newUser)
+  
+  // 5. Return user ที่สร้าง + status 201
+  return NextResponse.json(newUser, { status: 201 })
+}
+```
+
+**📤 วิธีเรียกใช้จาก Frontend:**
+
+```typescript
+// สร้าง user ใหม่
+async function createUser() {
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: 'New User',
+      email: 'new@example.com',
+      role: 'user'
+    })
+  })
+  
+  const data = await response.json()
+  console.log('User created:', data)
+}
+```
+
+**ตัวอย่างที่ 3: Dynamic API Route (รับพารามิเตอร์)**
+
 ```typescript
 // app/api/users/[id]/route.ts
+import { NextResponse } from 'next/server'
+
+// Mock data
+let users = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'user' }
+]
+
+// GET /api/users/123 - ดู user ID 123
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const userId = params.id
+  const userId = parseInt(params.id)
   
-  // TODO: Fetch from database
-  const user = { id: userId, name: 'John Doe' }
+  // หา user จาก ID
+  const user = users.find(u => u.id === userId)
+  
+  if (!user) {
+    return NextResponse.json(
+      { error: 'ไม่พบ user' },
+      { status: 404 }  // Not Found
+    )
+  }
   
   return NextResponse.json(user)
 }
+
+// PUT /api/users/123 - แก้ไข user ID 123
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const userId = parseInt(params.id)
+  const body = await request.json()
+  
+  // หา index ของ user
+  const index = users.findIndex(u => u.id === userId)
+  
+  if (index === -1) {
+    return NextResponse.json(
+      { error: 'ไม่พบ user' },
+      { status: 404 }
+    )
+  }
+  
+  // อัพเดต user
+  users[index] = {
+    ...users[index],  // เก็บค่าเดิม
+    ...body           // อัพเดตด้วยค่าใหม่
+  }
+  
+  return NextResponse.json(users[index])
+}
+
+// DELETE /api/users/123 - ลบ user ID 123
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const userId = parseInt(params.id)
+  
+  // กรอง (ลบ) user ที่มี ID ตรงกัน
+  users = users.filter(u => u.id !== userId)
+  
+  return NextResponse.json({ success: true })
+}
 ```
+
+**ตัวอย่างที่ 4: Error Handling (จัดการ Error)**
+
+```typescript
+// app/api/products/route.ts
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  try {
+    // สมมติว่าดึงข้อมูลจาก Database
+    // const products = await db.product.findMany()
+    
+    const products = [
+      { id: 1, name: 'Laptop', price: 1299.99 }
+    ]
+    
+    return NextResponse.json(products)
+  } catch (error) {
+    console.error('Error fetching products:', error)
+    
+    return NextResponse.json(
+      { error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
+      { status: 500 }  // Internal Server Error
+    )
+  }
+}
+```
+
+**📊 HTTP Status Codes ที่ใช้บ่อย:**
+
+| Code | ความหมาย | เมื่อไหร่ใช้ |
+|------|---------|-------------|
+| 200 | OK | สำเร็จ (GET, PUT, PATCH) |
+| 201 | Created | สร้างสำเร็จ (POST) |
+| 204 | No Content | สำเร็จแต่ไม่มีข้อมูล return |
+| 400 | Bad Request | ข้อมูลผิดพลาด |
+| 401 | Unauthorized | ไม่ได้ login |
+| 403 | Forbidden | ไม่มีสิทธิ์เข้าถึง |
+| 404 | Not Found | ไม่พบข้อมูล |
+| 500 | Internal Server Error | เกิดข้อผิดพลาดในเซิร์ฟเวอร์ |
+
+**💡 Tips:**
+- ตั้งชื่อ API endpoint เป็นพหูพจน์: `/api/users` ไม่ใช่ `/api/user`
+- ใช้ HTTP Status Code ให้ถูกต้อง ช่วยให้ Frontend เข้าใจ
+- Validate ข้อมูลที่ส่งเข้ามาเสมอ
+- ใช้ try-catch เพื่อจัดการ error
+
+**⚠️ ข้อควรระวัง:**
+- API Routes เป็น Server-side code ทำงานบน server ไม่ใช่ browser
+- **อย่าเก็บ sensitive data** (password, API keys) ใน Frontend
+- ใช้ Environment Variables สำหรับ secrets
+- Validate input ทุกครั้ง! อย่าเชื่อใจข้อมูลจาก client
+- ใน Production ควรใช้ Database จริง ไม่ใช่ in-memory array
 
 ### 🏠 การบ้านวันที่ 1
 
@@ -934,25 +1168,84 @@ export async function GET(
 
 #### 2.1 วางแผน Admin Panel (30 นาที)
 
-**Features ที่จะทำ:**
-- 📊 Dashboard (ภาพรวม)
-- 👥 User Management (CRUD)
-- 📦 Product Management (CRUD)
-- 🔐 Authentication (Login/Logout)
-- 📱 Responsive Design
+**💡 พื้นฐาน: Admin Panel คืออะไร?**
 
-**โครงสร้างหน้า:**
+Admin Panel (หรือ Dashboard) คือส่วนหลังบ้านสำหรับจัดการข้อมูลและระบบ:
+- เฉพาะ Admin/ผู้ดูแลระบบเข้าถึงได้
+- จัดการข้อมูล (Users, Products, Orders)
+- ดูสถิติและรายงาน
+- ตั้งค่าต่างๆ ของระบบ
+
+**ตัวอย่างในชีวิตจริง:**
+```
+เหมือนระบบหลังบ้านของร้านค้า:
+- พนักงาน (Frontend) = รับออเดอร์จากลูกค้า
+- ผู้จัดการ (Admin Panel) = ดูยอดขาย, จัดการพนักงาน, เพิ่มสินค้า
+```
+
+**🎯 องค์ประกอบหลักของ Admin Panel:**
+
+1. **Navigation (เมนู)** - Sidebar หรือ Top menu
+2. **Dashboard** - หน้าภาพรวม (สถิติ, กราฟ)
+3. **CRUD Pages** - หน้าจัดการข้อมูล (Create, Read, Update, Delete)
+4. **Forms** - ฟอร์มเพิ่ม/แก้ไขข้อมูล
+5. **Tables/Lists** - แสดงข้อมูลในรูปแบบตาราง
+6. **Authentication** - ระบบ Login/Logout
+
+**Features ที่จะทำ:**
+- 📊 **Dashboard** (ภาพรวม) - สถิติ users, products, orders
+- 👥 **User Management** (CRUD) - เพิ่ม/แก้ไข/ลบ users
+- 📦 **Product Management** (CRUD) - เพิ่ม/แก้ไข/ลบ products
+- 🔐 **Authentication** (Login/Logout) - ป้องกันการเข้าถึง
+- 📱 **Responsive Design** - ใช้งานได้ทุกอุปกรณ์
+
+**โครงสร้างหน้าที่จะสร้าง:**
 ```
 /admin
-├── /dashboard          # Dashboard หลัก
+├── /login              # หน้า Login (ไม่มี layout admin)
+├── /dashboard          # Dashboard หลัก (มี sidebar)
 ├── /users              # จัดการ Users
-│   ├── /new           # เพิ่ม User ใหม่
-│   └── /[id]/edit     # แก้ไข User
+│   ├── /               # รายการ users (table)
+│   ├── /new           # เพิ่ม user ใหม่ (form)
+│   └── /[id]/edit     # แก้ไข user (form)
 ├── /products          # จัดการ Products
+│   ├── /               # รายการ products (cards)
 │   ├── /new
 │   └── /[id]/edit
-└── /login             # หน้า Login
 ```
+
+**🎨 UI/UX Best Practices:**
+
+1. **Consistency (ความสม่ำเสมอ)**
+   - ใช้สีเดียวกันทั้งหมด
+   - ปุ่มขนาดและรูปร่างเหมือนกัน
+   - ระยะห่างสม่ำเสมอ
+
+2. **Clear Navigation (นำทางชัดเจน)**
+   - แสดงว่าอยู่หน้าไหน (active state)
+   - เมนูเรียงตามลำดับความสำคัญ
+   - มี breadcrumb (เส้นทางการนำทาง)
+
+3. **Feedback (แจ้งเตือน)**
+   - แสดงสถานะ Loading
+   - แจ้งเมื่อสำเร็จ/ผิดพลาด
+   - Confirm ก่อนลบข้อมูล
+
+4. **Responsive Design**
+   - Sidebar ซ่อนได้ใน mobile
+   - Table เลื่อนได้แนวนอน
+   - ปุ่มขนาดใหญ่พอสำหรับมือถือ
+
+**💡 Tips การออกแบบ:**
+- เริ่มจาก Desktop แล้วค่อย adapt เป็น Mobile
+- ใช้สีเข้มสำหรับ Sidebar (professional look)
+- Dashboard ใช้สีสันสดใส (cards, charts)
+- ปุ่มสำคัญใช้สีโดดเด่น (Primary color)
+
+**⚠️ ข้อควรระวัง:**
+- อย่าใส่ feature มากเกินไป (Keep it simple!)
+- ทดสอบบน Mobile ด้วย (50%+ ของ traffic อาจมาจาก mobile)
+- ใส่ Confirmation เมื่อลบข้อมูล (ป้องกันลบผิด)
 
 #### 2.2 สร้าง Layout สำหรับ Admin (1 ชั่วโมง)
 
@@ -1090,7 +1383,316 @@ export default function StatsCard({ title, value, icon, change }: StatsCardProps
 
 #### 2.4 Authentication System (1.5 ชั่วโมง)
 
+**💡 พื้นฐาน: Authentication คืออะไร?**
+
+Authentication (การยืนยันตัวตน) คือการตรวจสอบว่าผู้ใช้เป็นใครจริงๆ:
+
+```
+Authentication = "คุณคือใคร?"
+Authorization = "คุณมีสิทธิ์ทำอะไรได้บ้าง?"
+```
+
+**ตัวอย่างในชีวิตจริง:**
+```
+เหมือนการเข้าอาคาร:
+1. Authentication = แสดงบัตรประชาชน (พิสูจน์ว่าคุณคือใคร)
+2. Authorization = เจ้าหน้าที่ตรวจสอบว่าคุณมีชื่อในรายการผู้เข้าพบหรือไม่
+```
+
+**🔐 วิธีการ Authentication ที่นิยม:**
+
+1. **Session-based** (แบบเดิม)
+   - เก็บข้อมูล session บน server
+   - ส่ง cookie ให้ browser
+
+2. **Token-based** (นิยมใช้)
+   - สร้าง token (JWT)
+   - เก็บ token ใน localStorage/cookie
+   - ส่ง token ใน header ทุกครั้ง
+
+3. **OAuth** (Social login)
+   - Login ด้วย Google, Facebook, GitHub
+   - ใช้ NextAuth.js
+
+**ในบทนี้เราจะใช้แบบง่าย (Demo):**
+- ตรวจสอบ email/password
+- สร้าง token ง่ายๆ
+- เก็บใน localStorage
+
+**💡 สำคัญ: นี่เป็น DEMO เท่านั้น!**
+- ใน Production ต้องใช้ระบบที่ปลอดภัยกว่า
+- แนะนำ NextAuth.js หรือ Auth0
+- Password ต้อง hash (bcrypt)
+- Token ต้องมีวันหมดอายุ
+
 **Login Page:**
+```typescript
+// app/admin/login/page.tsx
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()  // ป้องกัน page refresh
+    setError('')        // ล้าง error เดิม
+    setLoading(true)    // แสดง loading state
+
+    try {
+      // เรียก API login
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        // Login สำเร็จ
+        localStorage.setItem('token', data.token)  // เก็บ token
+        localStorage.setItem('user', JSON.stringify(data.user))  // เก็บข้อมูล user
+        router.push('/admin/dashboard')  // ไปหน้า dashboard
+      } else {
+        // Login ไม่สำเร็จ
+        setError(data.message || 'Email หรือ Password ไม่ถูกต้อง')
+      }
+    } catch (err) {
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setLoading(false)  // ปิด loading
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          🔐 Admin Login
+        </h1>
+        
+        {/* แสดง Error message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Email field */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2 font-medium">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="admin@example.com"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {/* Password field */}
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-medium">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-2 rounded font-medium transition ${
+              loading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+          >
+            {loading ? 'กำลัง Login...' : 'Login'}
+          </button>
+        </form>
+
+        {/* Demo credentials */}
+        <div className="mt-6 p-4 bg-gray-50 rounded text-sm">
+          <p className="font-medium mb-2">Demo Account:</p>
+          <p className="text-gray-600">Email: admin@example.com</p>
+          <p className="text-gray-600">Password: password</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+**🔍 อธิบายโค้ด:**
+
+1. **State Management:**
+   - `email, password` = เก็บข้อมูลฟอร์ม
+   - `error` = แสดง error message
+   - `loading` = แสดงสถานะกำลัง loading
+
+2. **Form Validation:**
+   - `required` = บังคับกรอก
+   - `type="email"` = ต้องเป็นรูปแบบ email
+   - `e.preventDefault()` = ป้องกัน page refresh
+
+3. **Error Handling:**
+   - `try-catch` = จัดการ error
+   - แสดง error message ให้ user เห็น
+   - `finally` = ทำงานไม่ว่าสำเร็จหรือไม่ (ปิด loading)
+
+**Login API:**
+```typescript
+// app/api/auth/login/route.ts
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request) {
+  const { email, password } = await request.json()
+
+  // TODO: ตรวจสอบกับ Database
+  // const user = await db.user.findUnique({ where: { email } })
+  // const isValid = await bcrypt.compare(password, user.password)
+  
+  // สำหรับ Demo: ใช้ข้อมูลตายตัว
+  if (email === 'admin@example.com' && password === 'password') {
+    // Login สำเร็จ
+    return NextResponse.json({
+      success: true,
+      token: 'demo-token-' + Date.now(),  // สร้าง token
+      user: {
+        id: 1,
+        email: email,
+        name: 'Admin User',
+        role: 'admin'
+      }
+    })
+  }
+
+  // Login ไม่สำเร็จ
+  return NextResponse.json(
+    { 
+      success: false, 
+      message: 'Email หรือ Password ไม่ถูกต้อง' 
+    },
+    { status: 401 }  // Unauthorized
+  )
+}
+```
+
+**🛡️ Protected Route (ป้องกันหน้าที่ต้อง login)**
+
+```typescript
+// app/admin/dashboard/page.tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function DashboardPage() {
+  const router = useRouter()
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // ตรวจสอบว่า login หรือยัง
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+
+    if (!token || !userData) {
+      // ถ้ายังไม่ได้ login ให้ไปหน้า login
+      router.push('/admin/login')
+      return
+    }
+
+    // ถ้า login แล้ว
+    setUser(JSON.parse(userData))
+    setLoading(false)
+  }, [router])
+
+  if (loading) {
+    return <div>กำลังตรวจสอบ...</div>
+  }
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>ยินดีต้อนรับ, {user?.name}!</p>
+    </div>
+  )
+}
+```
+
+**🚪 Logout Function:**
+
+```typescript
+// components/admin/Header.tsx
+'use client'
+
+import { useRouter } from 'next/navigation'
+
+export default function Header() {
+  const router = useRouter()
+
+  const handleLogout = () => {
+    // ถามยืนยันก่อน logout
+    if (confirm('ต้องการออกจากระบบหรือไม่?')) {
+      // ลบข้อมูลทั้งหมด
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      
+      // ไปหน้า login
+      router.push('/admin/login')
+    }
+  }
+
+  return (
+    <header className="bg-white shadow">
+      <div className="flex justify-between items-center px-8 py-4">
+        <h2 className="text-xl font-bold">Dashboard</h2>
+        
+        <button
+          onClick={handleLogout}
+          className="text-red-600 hover:text-red-700 font-medium"
+        >
+          🚪 Logout
+        </button>
+      </div>
+    </header>
+  )
+}
+```
+
+**💡 Tips:**
+- เก็บ sensitive data (token) ใน httpOnly cookie จะปลอดภัยกว่า localStorage
+- ตรวจสอบ authentication ใน Middleware สำหรับทุก route
+- ใช้ NextAuth.js สำหรับ production (รองรับ OAuth, JWT, Database)
+
+**⚠️ ข้อควรระวัง:**
+- **อย่าเก็บ password แบบ plain text!** ต้อง hash ด้วย bcrypt
+- **อย่าส่ง sensitive data ใน URL** (ใช้ POST body)
+- **ตรวจสอบ token ทุกครั้ง** เมื่อเรียก API
+- localStorage อ่านได้จาก JavaScript (ระวัง XSS attack)
+- ใช้ HTTPS ใน Production (ป้องกัน Man-in-the-Middle)
 ```typescript
 // app/admin/login/page.tsx
 'use client'
